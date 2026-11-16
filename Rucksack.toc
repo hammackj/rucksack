@@ -5,6 +5,7 @@
 ## Version: @project-version@
 ## SavedVariables: RucksackDB
 ## Category: Bags & Inventory
+## X-Curse-Project-ID: 1810476
 ## IconTexture: Interface\Icons\INV_Misc_Bag_08
 
 Debug.lua

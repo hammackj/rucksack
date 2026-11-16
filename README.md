@@ -48,8 +48,9 @@ and written to disk on `/reload` or logout.
 ## Releasing
 
 Push a `v*` tag. GitHub Actions runs the BigWigs packager, which attaches the
-zip and a `release.json` to a GitHub release, so addon managers can pick the
-build for each game client.
+zip and a `release.json` to a GitHub release (so addon managers can pick the
+build for each game client) and uploads the same zip to CurseForge
+(project 1810476, using the `CF_API_KEY` repo secret).
 
 ## Use of AI
 
