@@ -245,24 +245,19 @@ local function newLiveButton(holder, slot)
 	setGlow(b, false)
 	b:HookScript('OnEnter', markSeen)
 
-	-- Alt-click protects/unprotects the item; right-click at a vendor won't
-	-- sell a protected one. Everything else goes to the template's handler.
-	local click = b:GetScript('OnClick')
-	b:SetScript('OnClick', function(self, button, down)
-		local bag, slot = self:GetParent():GetID(), self:GetID()
+	-- The template's OnClick must stay Blizzard's own: replacing or wrapping
+	-- it taints every click, and protected uses (armor kits, enchants, other
+	-- items that ask for a target) are then blocked. So alt-click is handled
+	-- in a hook that runs after it (Blizzard's alt-click does nothing here),
+	-- and selling a protected item at a vendor is stopped by a guard button
+	-- laid over the slot (see updateGuard), which takes the click instead.
+	b:HookScript('OnClick', function(self, button)
 		if button == 'LeftButton' and IsAltKeyDown() and not GetCursorInfo() then
+			local bag, slot = self:GetParent():GetID(), self:GetID()
 			local id = C.GetContainerItemID(bag, slot)
 			if id then
 				ns.ToggleProtected(id, C.GetContainerItemLink(bag, slot))
 			end
-			return
-		end
-		if button == 'RightButton' and ns.AtMerchant() and ns.IsProtected(C.GetContainerItemID(bag, slot)) then
-			print('|cff33ff99Satchel|r: that item is protected; Alt-click it first to sell it')
-			return
-		end
-		if click then
-			return click(self, button, down)
 		end
 	end)
 	return b
@@ -298,6 +293,65 @@ local function updateCooldown(b, bag, slot, hasItem)
 	end
 end
 
+-- At a vendor, a protected item gets a plain button over it so a right-click
+-- can't sell it. It still picks up, drags and shows the tooltip, and
+-- alt-click unprotects. It is not secure and never calls a protected API,
+-- so the item button underneath stays untainted.
+local function guardClick(self, button)
+	local b = self:GetParent()
+	local bag, slot = b:GetParent():GetID(), b:GetID()
+	if button == 'LeftButton' and IsAltKeyDown() and not GetCursorInfo() then
+		local id = C.GetContainerItemID(bag, slot)
+		if id then
+			ns.ToggleProtected(id, C.GetContainerItemLink(bag, slot))
+		end
+	elseif button == 'LeftButton' and IsModifiedClick() then
+		HandleModifiedItemClick(C.GetContainerItemLink(bag, slot))
+	elseif button == 'LeftButton' then
+		C.PickupContainerItem(bag, slot)
+	else
+		print('|cff33ff99Satchel|r: that item is protected; Alt-click it first to sell it')
+	end
+end
+
+local function guardDrag(self)
+	local b = self:GetParent()
+	C.PickupContainerItem(b:GetParent():GetID(), b:GetID())
+end
+
+local function guardEnter(self)
+	local enter = self:GetParent():GetScript('OnEnter')
+	if enter then
+		enter(self:GetParent())
+	end
+end
+
+local function guardLeave(self)
+	local leave = self:GetParent():GetScript('OnLeave')
+	if leave then
+		leave(self:GetParent())
+	end
+end
+
+local function updateGuard(b, itemID)
+	local show = ns.AtMerchant() and ns.IsProtected(itemID)
+	if show and not b.satchelGuard then
+		local g = CreateFrame('Button', nil, b)
+		g:SetAllPoints()
+		g:SetFrameLevel(b:GetFrameLevel() + 5)
+		g:RegisterForClicks('AnyUp')
+		g:RegisterForDrag('LeftButton')
+		g:SetScript('OnClick', guardClick)
+		g:SetScript('OnDragStart', guardDrag)
+		g:SetScript('OnEnter', guardEnter)
+		g:SetScript('OnLeave', guardLeave)
+		b.satchelGuard = g
+	end
+	if b.satchelGuard then
+		b.satchelGuard:SetShown(show)
+	end
+end
+
 local function updateLiveButton(b, bag, slot)
 	local info = C.GetContainerItemInfo(bag, slot)
 	local texture = info and info.iconFileID
@@ -320,6 +374,8 @@ local function updateLiveButton(b, bag, slot)
 	if b.JunkIcon then
 		b.JunkIcon:SetShown(SatchelDB.junkIcon and quality == 0 and not info.hasNoValue and not ns.IsProtected(info.itemID) or false)
 	end
+
+	updateGuard(b, info and info.itemID)
 
 	-- Plain field read only by our own search code.
 	b.satchelName = nameOf(link)

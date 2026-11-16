@@ -474,12 +474,14 @@ function handlers.MERCHANT_SHOW()
 	atMerchant = true
 	hookVendorButton()
 	ns.UpdateJunkButton()
+	ns.RefreshAll() -- guard protected items against right-click selling
 end
 
 function handlers.MERCHANT_CLOSED()
 	atMerchant = false
 	sellRun = sellRun + 1
 	ns.UpdateJunkButton()
+	ns.RefreshAll() -- drop the sell guards
 end
 
 -- Item levels and sell prices need item data the client may not have cached
