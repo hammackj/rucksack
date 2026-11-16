@@ -1,7 +1,7 @@
 --[[
 	Data.lua
 	Remembers every character's bags, bank, equipped items and gold in
-	SatchelDB.characters (saved per account, so all characters share it).
+	RucksackDB.characters (saved per account, so all characters share it).
 	That record drives the "view another character" windows and the item
 	counts added to tooltips.
 
@@ -14,17 +14,17 @@ local C = C_Container
 local index = {} -- character key -> { [itemID] = { bags, bank, equipped } }, rebuilt on demand
 
 function ns.InitData()
-	SatchelDB.characters = SatchelDB.characters or {}
+	RucksackDB.characters = RucksackDB.characters or {}
 	local name, realm = UnitName('player'), GetRealmName()
 	ns.me = name .. ' - ' .. realm
-	local c = SatchelDB.characters[ns.me] or {}
-	SatchelDB.characters[ns.me] = c
+	local c = RucksackDB.characters[ns.me] or {}
+	RucksackDB.characters[ns.me] = c
 	c.name, c.realm = name, realm
 	c.class = select(2, UnitClass('player'))
 end
 
 function ns.Character(key)
-	return SatchelDB and SatchelDB.characters and SatchelDB.characters[key or ns.me]
+	return RucksackDB and RucksackDB.characters and RucksackDB.characters[key or ns.me]
 end
 
 local function snapshot(bags)
@@ -109,12 +109,12 @@ end
 -- right-click selling at a vendor leave it alone, and sorting leaves it in its slot.
 
 function ns.IsProtected(itemID)
-	return itemID ~= nil and SatchelDB.protected[itemID] == true
+	return itemID ~= nil and RucksackDB.protected[itemID] == true
 end
 
 function ns.ToggleProtected(itemID, link)
-	SatchelDB.protected[itemID] = not SatchelDB.protected[itemID] or nil
-	print('|cff33ff99Satchel|r: ' .. (link or itemID) .. (SatchelDB.protected[itemID] and ' is protected from selling' or ' is no longer protected'))
+	RucksackDB.protected[itemID] = not RucksackDB.protected[itemID] or nil
+	print('|cff33ff99Rucksack|r: ' .. (link or itemID) .. (RucksackDB.protected[itemID] and ' is protected from selling' or ' is no longer protected'))
 	ns.RefreshAll()
 end
 
@@ -123,7 +123,7 @@ end
 -- Current character first, then the rest by name.
 function ns.CharacterKeys(field)
 	local keys = {}
-	for key, c in pairs(SatchelDB.characters or {}) do
+	for key, c in pairs(RucksackDB.characters or {}) do
 		if not field or c[field] then
 			keys[#keys + 1] = key
 		end
@@ -155,9 +155,9 @@ end
 
 function ns.Forget(name)
 	local removed = 0
-	for key, c in pairs(SatchelDB.characters or {}) do
+	for key, c in pairs(RucksackDB.characters or {}) do
 		if key ~= ns.me and (c.name or ''):lower() == name:lower() then
-			SatchelDB.characters[key] = nil
+			RucksackDB.characters[key] = nil
 			index[key] = nil
 			removed = removed + 1
 		end
@@ -173,7 +173,7 @@ local function countsFor(key)
 		return idx
 	end
 	idx = {}
-	local c = SatchelDB.characters[key]
+	local c = RucksackDB.characters[key]
 	local function add(id, field, n)
 		local e = idx[id]
 		if not e then
@@ -202,7 +202,7 @@ end
 local PLACES = { 'Bags', 'Bank', 'Equipped' }
 
 local function addCounts(tooltip, itemID)
-	if not itemID or not SatchelDB or not SatchelDB.tooltipCounts or not SatchelDB.characters then
+	if not itemID or not RucksackDB or not RucksackDB.tooltipCounts or not RucksackDB.characters then
 		return
 	end
 	local total, lines = 0, 0

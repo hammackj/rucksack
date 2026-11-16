@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="38%" r="70%">
+      <stop offset="0" stop-color="#2b4a52"/>
+      <stop offset="1" stop-color="#0f1c21"/>
+    </radialGradient>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#b06a35"/>
+      <stop offset="1" stop-color="#7a4220"/>
+    </linearGradient>
+    <linearGradient id="flap" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#c97d43"/>
+      <stop offset="1" stop-color="#9a5428"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffe08a"/>
+      <stop offset="0.55" stop-color="#e0a93a"/>
+      <stop offset="1" stop-color="#a8701c"/>
+    </linearGradient>
+  </defs>
+
+  <!-- background -->
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+  <rect x="10" y="10" width="492" height="492" rx="88" fill="none" stroke="#e0a93a" stroke-opacity="0.35" stroke-width="4"/>
+
+  <!-- shoulder strap -->
+  <path d="M120 236 C 120 92, 392 92, 392 236" fill="none" stroke="#5e3218" stroke-width="30" stroke-linecap="round"/>
+  <path d="M120 236 C 120 92, 392 92, 392 236" fill="none" stroke="#8a4c25" stroke-width="18" stroke-linecap="round"/>
+  <path d="M120 236 C 120 92, 392 92, 392 236" fill="none" stroke="#f0c48a" stroke-opacity="0.5" stroke-width="2.5" stroke-dasharray="9 8"/>
+
+  <!-- strap rings -->
+  <circle cx="120" cy="240" r="17" fill="none" stroke="url(#gold)" stroke-width="9"/>
+  <circle cx="392" cy="240" r="17" fill="none" stroke="url(#gold)" stroke-width="9"/>
+
+  <!-- shadow -->
+  <ellipse cx="256" cy="436" rx="170" ry="18" fill="#000" opacity="0.35"/>
+
+  <!-- body -->
+  <path d="M96 252 Q 96 236 112 236 L 400 236 Q 416 236 416 252 L 404 404 Q 402 428 378 428 L 134 428 Q 110 428 108 404 Z"
+        fill="url(#body)" stroke="#4a2611" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M118 256 L 394 256 L 384 400 Q 383 410 372 410 L 140 410 Q 129 410 128 400 Z"
+        fill="none" stroke="#f0c48a" stroke-opacity="0.45" stroke-width="2.5" stroke-dasharray="9 8"/>
+
+  <!-- flap -->
+  <path d="M88 236 Q 88 214 112 214 L 400 214 Q 424 214 424 236 L 424 300 Q 424 344 380 352 L 290 366 Q 256 372 222 366 L 132 352 Q 88 344 88 300 Z"
+        fill="url(#flap)" stroke="#4a2611" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M106 236 Q 106 230 112 230 L 400 230 Q 408 230 408 238 L 408 298 Q 408 330 376 336 L 288 350 Q 256 355 224 350 L 136 336 Q 104 330 104 298 Z"
+        fill="none" stroke="#f6d3a0" stroke-opacity="0.55" stroke-width="2.5" stroke-dasharray="9 8"/>
+  <!-- flap highlight -->
+  <path d="M112 222 L 400 222" stroke="#ffd9a8" stroke-opacity="0.35" stroke-width="4" stroke-linecap="round"/>
+
+  <!-- buckle strap -->
+  <rect x="236" y="300" width="40" height="96" rx="6" fill="#6b3818" stroke="#4a2611" stroke-width="4"/>
+  <!-- buckle -->
+  <rect x="220" y="330" width="72" height="56" rx="10" fill="none" stroke="url(#gold)" stroke-width="11"/>
+  <line x1="256" y1="334" x2="256" y2="382" stroke="url(#gold)" stroke-width="7" stroke-linecap="round"/>
+  <rect x="220" y="330" width="72" height="56" rx="10" fill="none" stroke="#5a3a0c" stroke-opacity="0.5" stroke-width="2"/>
+
+  <!-- coin peeking out -->
+  <circle cx="368" cy="398" r="22" fill="url(#gold)" stroke="#7a4f10" stroke-width="4"/>
+  <circle cx="368" cy="398" r="13" fill="none" stroke="#7a4f10" stroke-opacity="0.6" stroke-width="2.5"/>
+</svg>

@@ -1,5 +1,6 @@
-package-as: Satchel
+package-as: Rucksack
 
 ignore:
   - README.md
   - scripts
+  - media

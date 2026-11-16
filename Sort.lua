@@ -1,6 +1,6 @@
 --[[
 	Sort.lua
-	Satchel's own sort, used when the bags being sorted hold protected
+	Rucksack's own sort, used when the bags being sorted hold protected
 	(Alt-clicked) items: Blizzard's sort runs on the server and can't skip
 	single items, so this one moves items itself and leaves protected items in
 	their slots.
@@ -223,7 +223,7 @@ function ns.SortBags(bags, blizzardSort, stillValid)
 		return
 	end
 	if InCombatLockdown() then
-		print('|cff33ff99Satchel|r: can\'t sort in combat')
+		print('|cff33ff99Rucksack|r: can\'t sort in combat')
 		return
 	end
 	if not hasProtected(bags) then
@@ -239,7 +239,7 @@ function ns.SortBags(bags, blizzardSort, stillValid)
 	local function finish(msg)
 		running = false
 		if msg then
-			print('|cff33ff99Satchel|r: ' .. msg)
+			print('|cff33ff99Rucksack|r: ' .. msg)
 		end
 		ns.RefreshAll()
 	end

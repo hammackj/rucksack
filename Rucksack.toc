@@ -1,9 +1,9 @@
 ## Interface: 16001
-## Title: Satchel
+## Title: Rucksack
 ## Notes: All your bags in one window.
 ## Author: hammackj
 ## Version: @project-version@
-## SavedVariables: SatchelDB
+## SavedVariables: RucksackDB
 ## Category: Bags & Inventory
 ## IconTexture: Interface\Icons\INV_Misc_Bag_08
 
@@ -11,4 +11,4 @@ Debug.lua
 Data.lua
 Sort.lua
 Window.lua
-Satchel.lua
+Rucksack.lua

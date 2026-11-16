@@ -1,10 +1,10 @@
 --[[
 	Debug.lua
-	Development aids. Everything here lands in SatchelDB.debug, which WoW
-	writes to WTF/Account/<account>/SavedVariables/Satchel.lua on /reload or
+	Development aids. Everything here lands in RucksackDB.debug, which WoW
+	writes to WTF/Account/<account>/SavedVariables/Rucksack.lua on /reload or
 	logout, so errors can be read from disk instead of from screenshots.
 
-	- errors: Lua errors (from any addon, tagged when Satchel is involved)
+	- errors: Lua errors (from any addon, tagged when Rucksack is involved)
 	  and blocked/forbidden protected actions (taint), newest last.
 	- probe: what this client's API actually provides, recorded at login.
 --]]
@@ -15,9 +15,9 @@ local MAX_ERRORS = 50
 local pending = {} -- entries logged before SavedVariables are loaded
 
 local function append(entry)
-	SatchelDB.debug = SatchelDB.debug or {}
-	local log = SatchelDB.debug.errors or {}
-	SatchelDB.debug.errors = log
+	RucksackDB.debug = RucksackDB.debug or {}
+	local log = RucksackDB.debug.errors or {}
+	RucksackDB.debug.errors = log
 
 	local last = log[#log]
 	if last and last.msg == entry.msg then
@@ -33,7 +33,7 @@ end
 
 function ns.Log(kind, msg)
 	local entry = { t = date('%Y-%m-%d %H:%M:%S'), kind = kind, msg = tostring(msg) }
-	if SatchelDB then
+	if RucksackDB then
 		append(entry)
 	else
 		pending[#pending + 1] = entry
@@ -54,15 +54,15 @@ do
 		pcall(function()
 			local stack = debugstack and debugstack(3, 12, 0) or ''
 			local text = tostring(msg) .. '\n' .. stack
-			ns.Log(text:find(ADDON, 1, true) and 'error:satchel' or 'error', text)
+			ns.Log(text:find(ADDON, 1, true) and 'error:rucksack' or 'error', text)
 		end)
 		return previous(msg, ...)
 	end)
 end
 
 -- Taint: a protected action was blocked because insecure code touched its path.
--- ADDON_LOADED is handled here too, so errors raised while Satchel's other
--- files load (before Satchel.lua can register anything) still get saved.
+-- ADDON_LOADED is handled here too, so errors raised while Rucksack's other
+-- files load (before Rucksack.lua can register anything) still get saved.
 local watcher = CreateFrame('Frame')
 watcher:RegisterEvent('ADDON_ACTION_BLOCKED')
 watcher:RegisterEvent('ADDON_ACTION_FORBIDDEN')
@@ -70,7 +70,7 @@ watcher:RegisterEvent('ADDON_LOADED')
 watcher:SetScript('OnEvent', function(self, event, addon, func)
 	if event == 'ADDON_LOADED' then
 		if addon == ADDON then
-			SatchelDB = SatchelDB or {}
+			RucksackDB = RucksackDB or {}
 			ns.FlushLog()
 			self:UnregisterEvent('ADDON_LOADED')
 		end
@@ -156,8 +156,8 @@ function ns.Probe()
 	end
 	p.blizzardContainerFrames = frames
 
-	SatchelDB.debug = SatchelDB.debug or {}
-	SatchelDB.debug.probe = p
+	RucksackDB.debug = RucksackDB.debug or {}
+	RucksackDB.debug.probe = p
 end
 
 -- What the bank looks like to this client, per character, recorded each time
@@ -209,7 +209,7 @@ function ns.ProbeBank(takenOver)
 		end
 		table.sort(b.bankFrameChildren)
 	end
-	SatchelDB.debug = SatchelDB.debug or {}
-	SatchelDB.debug.bankProbe = SatchelDB.debug.bankProbe or {}
-	SatchelDB.debug.bankProbe[UnitName('player') or '?'] = b
+	RucksackDB.debug = RucksackDB.debug or {}
+	RucksackDB.debug.bankProbe = RucksackDB.debug.bankProbe or {}
+	RucksackDB.debug.bankProbe[UnitName('player') or '?'] = b
 end

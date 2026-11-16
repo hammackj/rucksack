@@ -1,7 +1,7 @@
 --[[
-	Satchel.lua
+	Rucksack.lua
 	Wiring: saved settings, which bags exist, replacing Blizzard's bag and
-	bank windows, events and the /satchel command.
+	bank windows, events and the /rucksack command.
 
 	Blizzard's own bag frames keep working invisibly (reparented to a hidden
 	frame), and every bag open/close function is hooked to mirror their open
@@ -26,7 +26,7 @@ local DEFAULTS = {
 local CHARACTER_BANK = Enum.BankType and Enum.BankType.Character or 0
 
 local function say(msg)
-	print('|cff33ff99Satchel|r: ' .. msg)
+	print('|cff33ff99Rucksack|r: ' .. msg)
 end
 
 --[[ Bags ]]--
@@ -42,7 +42,7 @@ function ns.InventoryBags(all)
 	for bag = BACKPACK_CONTAINER or 0, NUM_BAGS do
 		bags[#bags + 1] = bag
 	end
-	if KEYRING_CONTAINER and HasKey and HasKey() and (all or SatchelDB.showKeyring) then
+	if KEYRING_CONTAINER and HasKey and HasKey() and (all or RucksackDB.showKeyring) then
 		bags[#bags + 1] = KEYRING_CONTAINER
 	end
 	return bags
@@ -115,7 +115,7 @@ inventory = ns.NewWindow('Inventory', {
 	buttons = {
 		{ 'Interface\\Icons\\INV_Misc_Coin_02', 'Bank', toggleBank },
 		{ 'Interface\\Icons\\INV_Misc_Key_03', 'Show/hide keyring', function()
-			SatchelDB.showKeyring = not SatchelDB.showKeyring
+			RucksackDB.showKeyring = not RucksackDB.showKeyring
 			inventory:Refresh()
 		end },
 	},
@@ -132,13 +132,13 @@ inventory = ns.NewWindow('Inventory', {
 	end,
 })
 
--- Hands the open bank to Blizzard's own window, for what Satchel doesn't do
--- (buying bank slots or tabs). The next visit to a banker is Satchel's again.
+-- Hands the open bank to Blizzard's own window, for what Rucksack doesn't do
+-- (buying bank slots or tabs). The next visit to a banker is Rucksack's again.
 local blizzardBankOnHide -- BankFrame's own OnHide, saved the first time we see it
 local handingOver = false
 local function showBlizzardBank()
 	if not (atBank and BankFrame) then
-		print('|cff33ff99Satchel|r: visit a banker first')
+		print('|cff33ff99Rucksack|r: visit a banker first')
 		return
 	end
 	BankFrame:SetScript('OnHide', blizzardBankOnHide or nil)
@@ -231,8 +231,8 @@ function onBlizzardBankShown(panel, retries)
 		blizzardBankOnHide = panel:GetScript('OnHide') or false
 	end
 	local take = bankHasTabs()
-	SatchelDB.debug = SatchelDB.debug or {}
-	SatchelDB.debug.bank = { t = date('%Y-%m-%d %H:%M:%S'), tabs = take, numTabs = NUM_BANK_TABS }
+	RucksackDB.debug = RucksackDB.debug or {}
+	RucksackDB.debug.bank = { t = date('%Y-%m-%d %H:%M:%S'), tabs = take, numTabs = NUM_BANK_TABS }
 	-- Contents arrive a moment after the banker opens.
 	C_Timer.After(0.5, function()
 		local ok, err = pcall(ns.ProbeBank, take)
@@ -325,8 +325,8 @@ local function sellJunk()
 end
 
 -- The vendor window's own "Sell All Junk" button runs Blizzard's sell-all,
--- which knows nothing about Satchel's locks and sells locked greys too. When
--- there are locked greys, send it through Satchel's queue instead; otherwise
+-- which knows nothing about Rucksack's locks and sells locked greys too. When
+-- there are locked greys, send it through Rucksack's queue instead; otherwise
 -- leave Blizzard's button (and its confirmation) alone.
 local vendorHooked = false
 local function hookVendorButton()
@@ -338,7 +338,7 @@ local function hookVendorButton()
 	local blizzard = button:GetScript('OnClick')
 	button:SetScript('OnClick', function(self, ...)
 		if select(3, junk()) then
-			print('|cff33ff99Satchel|r: selling junk, keeping your locked items')
+			print('|cff33ff99Rucksack|r: selling junk, keeping your locked items')
 			sellJunk()
 		elseif blizzard then
 			blizzard(self, ...)
@@ -384,20 +384,20 @@ function handlers.ADDON_LOADED(name)
 	if name ~= ADDON then
 		return
 	end
-	SatchelDB = SatchelDB or {}
+	RucksackDB = RucksackDB or {}
 	for k, v in pairs(DEFAULTS) do
-		if SatchelDB[k] == nil then
-			SatchelDB[k] = v
+		if RucksackDB[k] == nil then
+			RucksackDB[k] = v
 		end
 	end
-	SatchelDB.positions = SatchelDB.positions or {}
-	SatchelDB.protected = SatchelDB.protected or {}
-	if SatchelDB.point then -- 0.1 kept a single position
-		SatchelDB.positions.Inventory, SatchelDB.point = SatchelDB.point, nil
+	RucksackDB.positions = RucksackDB.positions or {}
+	RucksackDB.protected = RucksackDB.protected or {}
+	if RucksackDB.point then -- 0.1 kept a single position
+		RucksackDB.positions.Inventory, RucksackDB.point = RucksackDB.point, nil
 	end
 	ns.FlushLog()
 	for _, w in ipairs(ns.Windows) do
-		w:SetScale(SatchelDB.scale)
+		w:SetScale(RucksackDB.scale)
 		w:RestorePosition()
 	end
 	events:UnregisterEvent('ADDON_LOADED')
@@ -522,22 +522,23 @@ for event in pairs(handlers) do
 	pcall(events.RegisterEvent, events, event)
 end
 
---[[ /satchel ]]--
+--[[ /rucksack ]]--
 
 local function setColumns(key, arg, label)
 	local n = tonumber(arg)
 	if n and n >= 4 and n <= 36 then
-		SatchelDB[key] = math.floor(n)
+		RucksackDB[key] = math.floor(n)
 		inventory:Refresh()
 		bank:Refresh()
-		say(label .. ' columns set to ' .. SatchelDB[key])
+		say(label .. ' columns set to ' .. RucksackDB[key])
 	else
-		say('usage: /satchel ' .. (key == 'columns' and 'cols' or 'bankcols') .. ' <4-36>')
+		say('usage: /rucksack ' .. (key == 'columns' and 'cols' or 'bankcols') .. ' <4-36>')
 	end
 end
 
-SLASH_SATCHEL1 = '/satchel'
-SlashCmdList.SATCHEL = function(msg)
+SLASH_RUCKSACK1 = '/rucksack'
+SLASH_RUCKSACK2 = '/satchel' -- the addon's old name
+SlashCmdList.RUCKSACK = function(msg)
 	local cmd, arg = (msg or ''):match('^(%S*)%s*(.-)$')
 	cmd = cmd:lower()
 
@@ -548,16 +549,16 @@ SlashCmdList.SATCHEL = function(msg)
 	elseif cmd == 'scale' then
 		local s = tonumber(arg)
 		if s and s >= 0.5 and s <= 2 then
-			SatchelDB.scale = s
+			RucksackDB.scale = s
 			for _, w in ipairs(ns.Windows) do
 				w:SetScale(s)
 			end
 			say('scale set to ' .. s)
 		else
-			say('usage: /satchel scale <0.5-2>')
+			say('usage: /rucksack scale <0.5-2>')
 		end
 	elseif cmd == 'reset' then
-		wipe(SatchelDB.positions)
+		wipe(RucksackDB.positions)
 		for _, w in ipairs(ns.Windows) do
 			w:RestorePosition()
 		end
@@ -567,32 +568,32 @@ SlashCmdList.SATCHEL = function(msg)
 			ilvl = 'itemLevel', junk = 'junkIcon', counts = 'tooltipCounts',
 			boe = 'boe', upgrades = 'upgrades', keys = 'showKeyring',
 		})[cmd]
-		SatchelDB[key] = not SatchelDB[key]
+		RucksackDB[key] = not RucksackDB[key]
 		inventory:Refresh()
 		bank:Refresh()
-		say(cmd .. ' ' .. (SatchelDB[key] and 'on' or 'off'))
+		say(cmd .. ' ' .. (RucksackDB[key] and 'on' or 'off'))
 	elseif cmd == 'forget' then
 		if arg == '' then
-			say('usage: /satchel forget <character name>')
+			say('usage: /rucksack forget <character name>')
 		else
 			say('forgot ' .. ns.Forget(arg) .. ' character(s) named ' .. arg)
 		end
 	elseif cmd == 'errors' then
-		local log = SatchelDB.debug and SatchelDB.debug.errors or {}
+		local log = RucksackDB.debug and RucksackDB.debug.errors or {}
 		if arg == 'clear' then
 			wipe(log)
 			say('error log cleared')
 		else
-			say(#log .. ' logged error(s); /reload saves them to disk. /satchel errors clear to empty')
+			say(#log .. ' logged error(s); /reload saves them to disk. /rucksack errors clear to empty')
 		end
 	elseif cmd == '' then
 		ToggleAllBags()
 	else
-		say('/satchel  - toggle bags')
-		say('/satchel cols <n> | bankcols <n> | scale <x> | reset')
-		say('/satchel ilvl | boe | upgrades | junk | counts | keys  - toggle item level, BoE, upgrade arrows, junk coin, tooltip counts, keyring')
+		say('/rucksack  - toggle bags')
+		say('/rucksack cols <n> | bankcols <n> | scale <x> | reset')
+		say('/rucksack ilvl | boe | upgrades | junk | counts | keys  - toggle item level, BoE, upgrade arrows, junk coin, tooltip counts, keyring')
 		say('Alt-click an item to protect it from selling')
-		say('/satchel forget <name>  - drop a deleted character\'s saved bags')
-		say('/satchel errors [clear]')
+		say('/rucksack forget <name>  - drop a deleted character\'s saved bags')
+		say('/rucksack errors [clear]')
 	end
 end

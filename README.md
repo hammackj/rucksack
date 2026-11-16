@@ -1,4 +1,4 @@
-# Satchel
+# Rucksack
 
 All your bags in one window, for WoW Forever.
 
@@ -13,7 +13,7 @@ All your bags in one window, for WoW Forever.
 - Sell junk button at vendors, coin marker on grey items
 - Item level on gear, a "BoE" label on unbound bind-on-equip items, and a green arrow on gear that's an upgrade over what you're wearing
 - Hover your gold to see every character's gold and the total
-- Alt-click an item to protect it: Sell junk skips it, right-click won't sell it at a vendor, and sorting leaves it in its slot (Satchel's own sort runs then, since Blizzard's can't skip items)
+- Alt-click an item to protect it: Sell junk skips it, right-click won't sell it at a vendor, and sorting leaves it in its slot (Rucksack's own sort runs then, since Blizzard's can't skip items)
 - Key button to show or hide the keyring
 - Bank window for your character bank tabs (opens at the banker; closing it ends the bank visit)
 - Free slot count and gold
@@ -22,16 +22,17 @@ All your bags in one window, for WoW Forever.
 ## Commands
 
 ```
-/satchel               toggle bags
-/satchel cols <4-36>   items per row in the bags (default 10)
-/satchel bankcols <n>  items per row in the bank (default 14)
-/satchel scale <x>     window scale, 0.5-2
-/satchel reset         move the windows back to their default spots
-/satchel ilvl | boe | upgrades | junk | counts | keys
-                       toggle item level, BoE label, upgrade arrows, junk coin,
-                       tooltip counts, keyring
-/satchel forget <name> drop a deleted character's saved bags
-/satchel errors [clear]
+/rucksack               toggle bags
+/rucksack cols <4-36>   items per row in the bags (default 10)
+/rucksack bankcols <n>  items per row in the bank (default 14)
+/rucksack scale <x>     window scale, 0.5-2
+/rucksack reset         move the windows back to their default spots
+/rucksack ilvl | boe | upgrades | junk | counts | keys
+                        toggle item level, BoE label, upgrade arrows, junk coin,
+                        tooltip counts, keyring
+/rucksack forget <name> drop a deleted character's saved bags
+/rucksack errors [clear]
+/satchel                still works (the old name)
 ```
 
 ## Development
@@ -41,7 +42,7 @@ scripts/deploy.sh     # copy into the Forever AddOns folder, then /reload in gam
 scripts/debuglog.sh   # read SavedVariables: logged errors and the client API probe
 ```
 
-Errors and blocked-action (taint) warnings are recorded in `SatchelDB.debug`
+Errors and blocked-action (taint) warnings are recorded in `RucksackDB.debug`
 and written to disk on `/reload` or logout.
 
 ## Releasing

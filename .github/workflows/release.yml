@@ -1,4 +1,4 @@
-# Push a tag like v0.1.0 to build Satchel-v0.1.0.zip and a release.json
+# Push a tag like v0.1.0 to build Rucksack-v0.1.0.zip and a release.json
 # (which lists the interface versions) and attach both to a GitHub release.
 name: Release
 

@@ -145,8 +145,8 @@ local function decorate(b, link, quality, itemID, bound, bag, slot)
 	local level = equipLoc and GetDetailedItemLevelInfo and GetDetailedItemLevelInfo(link)
 
 	-- Item level, top left
-	local fs = fontString(b, 'satchelLevel', 'TOPLEFT', 2, -2)
-	if SatchelDB.itemLevel and level and level > 1 then
+	local fs = fontString(b, 'rucksackLevel', 'TOPLEFT', 2, -2)
+	if RucksackDB.itemLevel and level and level > 1 then
 		local color = ITEM_QUALITY_COLORS and ITEM_QUALITY_COLORS[quality or 1]
 		fs:SetText(level)
 		if color then
@@ -158,9 +158,9 @@ local function decorate(b, link, quality, itemID, bound, bag, slot)
 	end
 
 	-- "BoE", bottom left
-	local boe = fontString(b, 'satchelBoE', 'BOTTOMLEFT', 2, 2)
+	local boe = fontString(b, 'rucksackBoE', 'BOTTOMLEFT', 2, 2)
 	local bindType = link and not bound and select(14, GetItemInfo(link))
-	if SatchelDB.boe and bindType == BIND_ON_EQUIP then
+	if RucksackDB.boe and bindType == BIND_ON_EQUIP then
 		boe:SetText('BoE')
 		boe:SetTextColor(0.3, 0.8, 1)
 		boe:Show()
@@ -169,9 +169,9 @@ local function decorate(b, link, quality, itemID, bound, bag, slot)
 	end
 
 	-- Upgrade arrow, top right
-	local arrow = texture(b, 'satchelUpgrade', 'TOPRIGHT', -1, -1, 14)
+	local arrow = texture(b, 'rucksackUpgrade', 'TOPRIGHT', -1, -1, 14)
 	local upgrade = false
-	if SatchelDB.upgrades and level and bag then
+	if RucksackDB.upgrades and level and bag then
 		local current = equippedLevel(equipLoc)
 		upgrade = current ~= nil and level > current and canWear(bag, slot, link)
 	end
@@ -186,7 +186,7 @@ local function decorate(b, link, quality, itemID, bound, bag, slot)
 	end
 
 	-- Protected lock, left middle
-	local lock = texture(b, 'satchelLock', 'LEFT', 1, 0, 14)
+	local lock = texture(b, 'rucksackLock', 'LEFT', 1, 0, 14)
 	if ns.IsProtected(itemID) then
 		lock:SetTexture('Interface\\Buttons\\LockButton-Locked-Up')
 		lock:Show()
@@ -234,7 +234,7 @@ end
 
 local function newLiveButton(holder, slot)
 	created = created + 1
-	local b = CreateFrame(BUTTON_TYPE, 'SatchelItem' .. created, holder, 'ContainerFrameItemButtonTemplate')
+	local b = CreateFrame(BUTTON_TYPE, 'RucksackItem' .. created, holder, 'ContainerFrameItemButtonTemplate')
 	b:SetID(slot)
 	-- The template's own event/show handlers assume Blizzard's bag frames;
 	-- everything they would update is done by updateButton instead.
@@ -310,7 +310,7 @@ local function guardClick(self, button)
 	elseif button == 'LeftButton' then
 		C.PickupContainerItem(bag, slot)
 	else
-		print('|cff33ff99Satchel|r: that item is protected; Alt-click it first to sell it')
+		print('|cff33ff99Rucksack|r: that item is protected; Alt-click it first to sell it')
 	end
 end
 
@@ -335,7 +335,7 @@ end
 
 local function updateGuard(b, itemID)
 	local show = ns.AtMerchant() and ns.IsProtected(itemID)
-	if show and not b.satchelGuard then
+	if show and not b.rucksackGuard then
 		local g = CreateFrame('Button', nil, b)
 		g:SetAllPoints()
 		g:SetFrameLevel(b:GetFrameLevel() + 5)
@@ -345,10 +345,10 @@ local function updateGuard(b, itemID)
 		g:SetScript('OnDragStart', guardDrag)
 		g:SetScript('OnEnter', guardEnter)
 		g:SetScript('OnLeave', guardLeave)
-		b.satchelGuard = g
+		b.rucksackGuard = g
 	end
-	if b.satchelGuard then
-		b.satchelGuard:SetShown(show)
+	if b.rucksackGuard then
+		b.rucksackGuard:SetShown(show)
 	end
 end
 
@@ -372,13 +372,13 @@ local function updateLiveButton(b, bag, slot)
 	setGlow(b, new, paid, quality)
 
 	if b.JunkIcon then
-		b.JunkIcon:SetShown(SatchelDB.junkIcon and quality == 0 and not info.hasNoValue and not ns.IsProtected(info.itemID) or false)
+		b.JunkIcon:SetShown(RucksackDB.junkIcon and quality == 0 and not info.hasNoValue and not ns.IsProtected(info.itemID) or false)
 	end
 
 	updateGuard(b, info and info.itemID)
 
 	-- Plain field read only by our own search code.
-	b.satchelName = nameOf(link)
+	b.rucksackName = nameOf(link)
 end
 
 --[[ Offline item buttons ]]--
@@ -400,7 +400,7 @@ end
 
 local function newOfflineButton(parent)
 	created = created + 1
-	local name = 'SatchelItem' .. created
+	local name = 'RucksackItem' .. created
 	local ok, b = pcall(CreateFrame, BUTTON_TYPE, name, parent, 'ItemButtonTemplate')
 	if not ok then
 		b = CreateFrame('Button', name, parent)
@@ -426,7 +426,7 @@ local function updateOfflineButton(b, item)
 		SetItemButtonQuality(b, item and item.q, link)
 	end
 	decorate(b, link, item and item.q, item and item.id, item and item.b)
-	b.satchelName = nameOf(link)
+	b.rucksackName = nameOf(link)
 end
 
 --[[ Window ]]--
@@ -455,14 +455,14 @@ end
 --   bags      function returning the list of bag IDs to show
 --   store     field of the character record holding this window's snapshot
 --   live      function: can the current character's real bags be shown now?
---   columns   SatchelDB key holding the column count
+--   columns   RucksackDB key holding the column count
 --   money     true to show gold
 --   sort      function that sorts these bags (adds a sort button)
 --   buttons   extra title-bar buttons: { icon, tooltip, onClick }
 --   onHide    function called after the window hides
 --   default   default position: { point, relPoint, x, y }
 function ns.NewWindow(key, opts)
-	local name = 'Satchel' .. key .. 'Frame'
+	local name = 'Rucksack' .. key .. 'Frame'
 	local frame = CreateFrame('Frame', name, UIParent, 'BackdropTemplate')
 	Mixin(frame, Window)
 	frame.key, frame.opts = key, opts
@@ -529,9 +529,9 @@ function ns.NewWindow(key, opts)
 	end
 
 	-- Search: prefer the standard search box (magnifier, clear button), else a plain input.
-	local ok, search = pcall(CreateFrame, 'EditBox', 'Satchel' .. key .. 'Search', frame, 'SearchBoxTemplate')
+	local ok, search = pcall(CreateFrame, 'EditBox', 'Rucksack' .. key .. 'Search', frame, 'SearchBoxTemplate')
 	if not ok then
-		search = CreateFrame('EditBox', 'Satchel' .. key .. 'Search', frame, 'InputBoxTemplate')
+		search = CreateFrame('EditBox', 'Rucksack' .. key .. 'Search', frame, 'InputBoxTemplate')
 	end
 	search:SetAutoFocus(false)
 	search:SetHeight(20)
@@ -546,7 +546,7 @@ function ns.NewWindow(key, opts)
 	frame.free:SetPoint('BOTTOMLEFT', PAD + 2, 12)
 
 	if opts.money then
-		frame.money = CreateFrame('Frame', 'Satchel' .. key .. 'Money', frame, 'SmallMoneyFrameTemplate')
+		frame.money = CreateFrame('Frame', 'Rucksack' .. key .. 'Money', frame, 'SmallMoneyFrameTemplate')
 		frame.money:SetPoint('BOTTOMRIGHT', -PAD + 6, 10)
 		-- Hovering the gold lists every character's gold.
 		local mname = frame.money:GetName()
@@ -625,7 +625,7 @@ end
 function Window:ApplySearch()
 	local text = (self.search:GetText() or ''):lower()
 	eachButton(self, function(b)
-		local match = text == '' or (b.satchelName and b.satchelName:lower():find(text, 1, true)) ~= nil
+		local match = text == '' or (b.rucksackName and b.rucksackName:lower():find(text, 1, true)) ~= nil
 		if b.SetMatchesSearch then
 			b:SetMatchesSearch(match)
 		else
@@ -635,7 +635,7 @@ function Window:ApplySearch()
 end
 
 function Window:Place(b, index)
-	local cols = SatchelDB[self.opts.columns]
+	local cols = RucksackDB[self.opts.columns]
 	local col, row = index % cols, floor(index / cols)
 	b:ClearAllPoints()
 	b:SetPoint('TOPLEFT', self, 'TOPLEFT', PAD + col * (SIZE + GAP), -(TOP + row * (SIZE + GAP)))
@@ -643,7 +643,7 @@ function Window:Place(b, index)
 end
 
 function Window:Resize(count)
-	local cols = SatchelDB[self.opts.columns]
+	local cols = RucksackDB[self.opts.columns]
 	local rows = math.max(1, math.ceil(count / cols))
 	self:SetSize(PAD * 2 + cols * SIZE + (cols - 1) * GAP, TOP + rows * SIZE + (rows - 1) * GAP + BOTTOM)
 end
@@ -724,7 +724,7 @@ function Window:RenderOffline()
 	local data = c and c[self.opts.store]
 	local bags = {}
 	for bag in pairs(data or {}) do
-		if bag ~= KEYRING_CONTAINER or SatchelDB.showKeyring then
+		if bag ~= KEYRING_CONTAINER or RucksackDB.showKeyring then
 			bags[#bags + 1] = bag
 		end
 	end
@@ -839,11 +839,11 @@ end
 
 function Window:SavePosition()
 	local point, _, relPoint, x, y = self:GetPoint(1)
-	SatchelDB.positions[self.key] = { point, relPoint, x, y }
+	RucksackDB.positions[self.key] = { point, relPoint, x, y }
 end
 
 function Window:RestorePosition()
 	self:ClearAllPoints()
-	local p = SatchelDB.positions[self.key] or self.opts.default
+	local p = RucksackDB.positions[self.key] or self.opts.default
 	self:SetPoint(p[1], UIParent, p[2], p[3], p[4])
 end
