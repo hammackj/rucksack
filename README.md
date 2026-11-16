@@ -50,3 +50,12 @@ and written to disk on `/reload` or logout.
 Push a `v*` tag. GitHub Actions runs the BigWigs packager, which attaches the
 zip and a `release.json` to a GitHub release, so addon managers can pick the
 build for each game client.
+
+## Use of AI
+
+Rucksack is developed with help from [Claude](https://claude.com/claude-code),
+Anthropic's AI coding assistant. Claude writes and edits much of the code,
+commit messages and release notes under the author's direction; the author
+decides what goes in, reviews the changes and tests them in game before
+release. Bug reports and feedback go to the
+[issue tracker](https://github.com/hammackj/rucksack/issues).
